@@ -61,6 +61,14 @@ kos-conformance 按发行版用例集验证能力、Provider、扩展与应用�
 - 没有注册实现的 Provider 全部记为未执行，绝不计为通过。
 - 整体结论：运行摘要与发行版记录一致且全部用例通过才记 `passed`；一致但存在未通过或未执行记 `failed`；摘要不一致记 `incomparable`，报告同时给出运行摘要与发行版摘要。
 
+## 扩展制品
+
+本产品按独立扩展交付：声明由 `release/` 给出，包由 kos-sdk 的打包工具产出，装载与卸载走系统组件的同一通道。
+
+- 声明面取 KOSD-C-18 的字段集合（`id`、`version`、`frameworkVersion`、`contributions`、`dependencies`、`permissions`、`config`、`status`、`uninstallRetention`），字段集合与 kos-sdk 的清单结构一致，不新增字段，也不为缺项补默认值。本产品不贡献任何类别：没有页面、窗口、对象类、控制器、能力与设置项，也不声明写入范围，所以装载不产生终端用户页面或窗口，也不改变内核 kind 集合、能力基线与写者表。
+- 打包：`make package`（`cmd/kos-conformance-package`）调用 kos-sdk 的 `packaging.Pack` 产出 `dist/kos-conformance-0.1.0.tgz` 并打印摘要。包内只有 `manifest.json`、`digest` 与清单声明的资产（本产品没有 UI 资产）；摘要覆盖清单与全部资产，`packaging.Verify` 是安装路径对包的检查，第一方与第三方同一条路径。
+- 装载与卸载：以系统组件安装——把包放到分发位置，用该包的摘要创建系统组件对象（`spec.package.reference` 指向包、`spec.package.digest` 取打印的摘要）；卸载即删除该系统组件。没有本产品专用的安装入口、API 或清单字段。
+
 ## 运行入口
 
 ```sh
@@ -77,7 +85,8 @@ bin/kos-conformance run -provider <name> -distribution-digest <sha256:...> [-jso
 ```sh
 make lint        # gofmt 检查与 go vet
 make test        # go test ./...
-make acceptance  # tests/acceptance/CONF-TC-1..4，逐条复现设计场景
+make acceptance  # tests/acceptance/CONF-TC-1..4 与 KOSD-TC-155，逐条复现设计场景
+make package     # 产出扩展包并打印摘要
 ```
 
 验收用例目录以设计编号命名，一条用例一个目录。

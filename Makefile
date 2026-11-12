@@ -7,7 +7,7 @@
 SHELL := /bin/sh
 GO ?= go
 
-.PHONY: all build lint test acceptance fmt-check vet clean
+.PHONY: all build lint test acceptance package fmt-check vet clean
 
 all: build lint test
 
@@ -34,5 +34,10 @@ test:
 acceptance:
 	$(GO) test ./tests/... -count=1 -v
 
+# package writes this product's extension artifact through the SDK packing path;
+# it prints the artifact path and the digest a component install names.
+package:
+	$(GO) run ./cmd/kos-conformance-package -out dist
+
 clean:
-	rm -rf bin
+	rm -rf bin dist
